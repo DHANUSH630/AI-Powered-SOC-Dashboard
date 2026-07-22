@@ -1,0 +1,16 @@
+services:
+  # ---- FastAPI Backend ----
+  - type: web
+    name: sentinelai-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: MONGODB_URL
+        sync: false
+      - key: DATABASE_NAME
+        value: sentinelai
+      - key: JWT_SECRET_KEY
+        generateValue: true

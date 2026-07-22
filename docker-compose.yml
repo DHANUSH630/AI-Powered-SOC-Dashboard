@@ -1,0 +1,85 @@
+# ===================================
+# SentinelAI Docker Compose
+# ===================================
+version: "3.8"
+
+services:
+  # ---- MongoDB ----
+  mongodb:
+    image: mongo:7
+    container_name: sentinelai-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: sentinelai
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - sentinelai-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- Redis ----
+  redis:
+    image: redis:7-alpine
+    container_name: sentinelai-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sentinelai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ---- Backend (FastAPI) ----
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: sentinelai-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sentinelai-network
+    volumes:
+      - ./backend:/app/backend
+      - ./ai_engine:/app/ai_engine
+
+  # ---- Frontend (React + Nginx) ----
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: sentinelai-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - sentinelai-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  sentinelai-network:
+    driver: bridge

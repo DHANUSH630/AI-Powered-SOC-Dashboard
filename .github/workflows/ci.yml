@@ -1,0 +1,125 @@
+# ===================================
+# SentinelAI CI/CD Pipeline
+# ===================================
+name: SentinelAI CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  # ---- Backend Tests ----
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run backend tests
+        env:
+          MONGODB_URL: mongodb://localhost:27017
+          DATABASE_NAME: sentinelai_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET_KEY: test-secret-key
+        run: |
+          cd SentinelAI
+          python -m pytest tests/ -v --tb=short
+
+  # ---- Frontend Tests ----
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: SentinelAI/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: SentinelAI/frontend
+        run: npm ci
+
+      - name: Lint check
+        working-directory: SentinelAI/frontend
+        run: npm run lint --if-present
+
+      - name: Build
+        working-directory: SentinelAI/frontend
+        run: npm run build
+
+  # ---- Docker Build ----
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Backend Image
+        working-directory: SentinelAI
+        run: docker build -f docker/Dockerfile.backend -t sentinelai-backend .
+
+      - name: Build Frontend Image
+        working-directory: SentinelAI
+        run: docker build -f docker/Dockerfile.frontend -t sentinelai-frontend .
+
+  # ---- Security Scan ----
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install safety
+        run: pip install safety
+
+      - name: Run dependency security check
+        run: safety check -r SentinelAI/backend/requirements.txt --output text || true
