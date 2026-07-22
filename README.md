@@ -4,6 +4,8 @@
 
 ### Enterprise AI-Powered Security Operations Center (SOC) Dashboard
 
+[![Live Demo](https://img.shields.io/badge/🚀_LIVE_DEMO-ai--powered--soc--dashboard.vercel.app-6366f1?style=for-the-badge&logo=vercel&logoColor=white)](https://ai-powered-soc-dashboard.vercel.app)
+
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/Frontend-React_19_--_Vite_8-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS_v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
@@ -13,6 +15,15 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **An enterprise-grade SOC platform leveraging Artificial Intelligence & Machine Learning to ingest multi-format security logs, detect zero-day threats in real time, automate incident response playbooks (SOAR), and assist security analysts via a natural language AI chatbot.**
+
+---
+
+### 🌐 Live Production Dashboard
+### 🚀 **[https://ai-powered-soc-dashboard.vercel.app](https://ai-powered-soc-dashboard.vercel.app)**
+
+*Default Demo Login:* `admin@sentinelai.io` / `AdminSecret123!`
+
+---
 
 [Explore Docs](docs/SRS.md) · [API Specs](docs/API_DOCUMENTATION.md) · [Architecture](docs/ARCHITECTURE.md) · [Live Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
 
@@ -137,11 +148,11 @@ npm run dev
 
 ---
 
-## 🌐 1-Click Cloud Deployment
+## 🌐 Live Cloud Deployment
 
-| Component | Cloud Host | Configuration File |
+| Component | Live Host | URL / Configuration File |
 | :--- | :--- | :--- |
-| **Frontend** | **Vercel** | [`frontend/vercel.json`](file:///d:/STUFF/AI%20Powered%20SOC%20Dashboard/SentinelAI/frontend/vercel.json) |
+| **Frontend** | **Vercel** | 🚀 **[https://ai-powered-soc-dashboard.vercel.app](https://ai-powered-soc-dashboard.vercel.app)** |
 | **Backend** | **Render / Railway** | [`render.yaml`](file:///d:/STUFF/AI%20Powered%20SOC%20Dashboard/SentinelAI/render.yaml) & [`Procfile`](file:///d:/STUFF/AI%20Powered%20SOC%20Dashboard/SentinelAI/Procfile) |
 | **Database** | **MongoDB Atlas** | Cloud URI in `.env` |
 
